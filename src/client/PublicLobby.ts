@@ -41,6 +41,16 @@ export class PublicLobby extends LitElement {
   private async fetchAndUpdateLobbies(): Promise<void> {
     try {
       this.lobbies = await this.fetchLobbies();
+      if (this.lobbies.length > 0) {
+        const lobby = this.lobbies[0];
+        if (lobby?.gameConfig) {
+          console.info("[PublicLobby] Current lobby fetched:", {
+            map: lobby.gameConfig.gameMap,
+            mode: lobby.gameConfig.gameMode,
+            teams: lobby.gameConfig.playerTeams,
+          });
+        }
+      }
       this.lobbies.forEach((l) => {
         // Store the start time on first fetch because endpoint is cached, causing
         // the time to appear irregular.
@@ -79,6 +89,14 @@ export class PublicLobby extends LitElement {
     if (this.lobbies.length === 0) return html``;
 
     const lobby = this.lobbies[0];
+    if (lobby?.gameConfig) {
+      // Log during each render for visibility
+      console.info("[PublicLobby] Rendering lobby:", {
+        map: lobby.gameConfig.gameMap,
+        mode: lobby.gameConfig.gameMode,
+        teams: lobby.gameConfig.playerTeams,
+      });
+    }
     if (!lobby?.gameConfig) {
       return;
     }

@@ -173,6 +173,8 @@ export class ClientGameRunner {
 
   private lastMessageTime: number = 0;
   private connectionCheckInterval: NodeJS.Timeout | null = null;
+  // Interval that periodically prints a summary of the current game state
+  private gameStateInterval: NodeJS.Timeout | null = null;
 
   constructor(
     private lobby: LobbyConfig,
@@ -184,6 +186,8 @@ export class ClientGameRunner {
     private gameView: GameView,
   ) {
     this.lastMessageTime = Date.now();
+    this.connectionCheckInterval = null;
+    this.gameStateInterval = null;
   }
 
   private getWinner(update: WinUpdate): Winner {
@@ -239,6 +243,42 @@ export class ClientGameRunner {
     this.eventBus.on(DoBoatAttackEvent, (e) => this.doBoatAttackUnderCursor());
 
     this.renderer.initialize();
+    // Print a snapshot of the game state every 5 seconds for debugging purposes
+    this.gameStateInterval = setInterval(() => {
+      const gv = this.gameView;
+      try {
+        const summary = {
+          tick: gv.ticks(),
+          players: gv.players().map((p) => ({
+            id: p.id(),
+            tiles: p.numTilesOwned(),
+            troops: p.troops(),
+          })),
+          units: gv.units().length,
+          tileOwnership: (() => {
+            const ownership: Record<
+              string,
+              Array<{ x: number; y: number }>
+            > = {};
+            gv.players().forEach((p) => (ownership[String(p.id())] = []));
+
+            // Iterate through every tile on the map and record its owner.
+            gv.forEachTile((tile) => {
+              const owner = gv.owner(tile);
+              if (owner.isPlayer()) {
+                const pidKey = String(owner.id());
+                ownership[pidKey].push({ x: gv.x(tile), y: gv.y(tile) });
+              }
+            });
+
+            return ownership;
+          })(),
+        };
+        console.log("[GameState]", summary);
+      } catch (err) {
+        console.error("Failed to log game state", err);
+      }
+    }, 5000);
     this.input.initialize();
     this.worker.start((gu: GameUpdateViewData | ErrorUpdate) => {
       if (this.lobby.gameStartInfo === undefined) {
@@ -339,6 +379,10 @@ export class ClientGameRunner {
     if (this.connectionCheckInterval) {
       clearInterval(this.connectionCheckInterval);
       this.connectionCheckInterval = null;
+    }
+    if (this.gameStateInterval) {
+      clearInterval(this.gameStateInterval);
+      this.gameStateInterval = null;
     }
   }
 

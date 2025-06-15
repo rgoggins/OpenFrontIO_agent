@@ -8,7 +8,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { z } from "zod/v4";
 import { GameEnv } from "../core/configuration/Config";
 import { getServerConfigFromServer } from "../core/configuration/ConfigLoader";
-import { GameType } from "../core/game/Game";
+import { GameMapType, GameMode, GameType } from "../core/game/Game";
 import {
   ClientJoinMessageSchema,
   GameRecord,
@@ -95,7 +95,18 @@ export function startWorker() {
         return res.status(400).json({ error });
       }
 
-      const gc = result.data;
+      let gc = result.data;
+
+      if (gc && gc.gameType === GameType.Public) {
+        // Override public game configuration to always be Pangaea FFA
+        gc = {
+          ...gc,
+          gameMap: GameMapType.Pangaea,
+          gameMode: GameMode.FFA,
+          playerTeams: undefined,
+        };
+      }
+
       if (
         gc?.gameType === GameType.Public &&
         req.headers[config.adminHeader()] !== config.adminToken()

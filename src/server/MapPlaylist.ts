@@ -45,6 +45,8 @@ export class MapPlaylist {
   public gameConfig(): GameConfig {
     const { map, mode } = this.getNextMap();
 
+    log.info(`MapPlaylist selected map=${map}, mode=${mode}`);
+
     const numPlayerTeams =
       mode === GameMode.Team ? 2 + Math.floor(Math.random() * 5) : undefined;
 
@@ -65,18 +67,8 @@ export class MapPlaylist {
   }
 
   private getNextMap(): MapWithMode {
-    if (this.mapsPlaylist.length === 0) {
-      const numAttempts = 10000;
-      for (let i = 0; i < numAttempts; i++) {
-        if (this.shuffleMapsPlaylist()) {
-          log.info(`Generated map playlist in ${i} attempts`);
-          return this.mapsPlaylist.shift()!;
-        }
-      }
-      log.error("Failed to generate a valid map playlist");
-    }
-    // Even if it failed, playlist will be partially populated.
-    return this.mapsPlaylist.shift()!;
+    // Always return Pangaea Free-For-All to ensure the landing page only proposes this map and mode.
+    return { map: GameMapType.Pangaea, mode: GameMode.FFA };
   }
 
   private shuffleMapsPlaylist(): boolean {

@@ -80,36 +80,9 @@ export enum GameMapType {
 }
 
 export const mapCategories: Record<string, GameMapType[]> = {
-  continental: [
-    GameMapType.World,
-    GameMapType.WorldMapGiant,
-    GameMapType.NorthAmerica,
-    GameMapType.SouthAmerica,
-    GameMapType.Europe,
-    GameMapType.EuropeClassic,
-    GameMapType.Asia,
-    GameMapType.Africa,
-    GameMapType.Oceania,
-  ],
-  regional: [
-    GameMapType.BlackSea,
-    GameMapType.Britannia,
-    GameMapType.GatewayToTheAtlantic,
-    GameMapType.BetweenTwoSeas,
-    GameMapType.Iceland,
-    GameMapType.EastAsia,
-    GameMapType.Mena,
-    GameMapType.Australia,
-    GameMapType.FaroeIslands,
-    GameMapType.FalklandIslands,
-    GameMapType.Baikal,
-    GameMapType.Halkidiki,
-  ],
-  fantasy: [
-    GameMapType.Pangaea,
-    GameMapType.Mars,
-    GameMapType.DeglaciatedAntarctica,
-  ],
+  continental: [],
+  regional: [],
+  fantasy: [GameMapType.Pangaea],
 };
 
 export enum GameType {
